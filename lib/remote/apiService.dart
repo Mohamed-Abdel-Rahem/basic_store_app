@@ -1,6 +1,7 @@
 import 'package:basic_store_app/model/apiException.dart';
 import 'package:basic_store_app/model/loginModel.dart';
 import 'package:basic_store_app/model/registerModel.dart';
+import 'package:basic_store_app/model/weatherResponseModel.dart';
 import 'package:basic_store_app/remote/constant.dart';
 import 'package:basic_store_app/remote/dioConfig.dart';
 import 'package:dio/dio.dart';
@@ -37,6 +38,43 @@ class ApiService {
       return LoginModel.fromJson(response.data);
     } on DioException catch (e) {
       throw handleException(e);
+    }
+  }
+
+  //3- Weather Response API
+  Future<WeatherResponse> weahterResponse({required String cityName}) async {
+    Dio dio = Dioconfig.getDio(url: Constants.weatherUrl);
+
+    try {
+      Response response = await dio.get(
+        Constants.weatherEndPoint,
+
+        queryParameters: {'q': cityName, 'appid': Constants.apiKey},
+      );
+      return WeatherResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      // 1. معالجة مشاكل الشبكة
+      if (e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout) {
+        throw ApiexceptionWeather(
+          cod: 0,
+          message: "Check your internet connection.",
+        );
+      }
+
+      // 2. معالجة الـ Errors اللي جاية من السيرفر (400, 404, 500)
+      if (e.response != null) {
+        throw ApiexceptionWeather.fromJson(e.response!.data);
+      }
+
+      // 3. حالة طوارئ لأي خطأ غير متوقع
+      throw ApiexceptionWeather(
+        cod: 500,
+        message: "Unexpected error occurred.",
+      );
+    } catch (e) {
+      // لأي خطأ برمجى أخر
+      throw ApiexceptionWeather(cod: 500, message: e.toString());
     }
   }
 
