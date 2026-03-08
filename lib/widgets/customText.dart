@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 Widget customText({
   required String textHint,
   required String textLabel,
-  required TextEditingController controller,
+  required TextEditingController? controller,
   required TextInputType keyboardType,
   bool obsecureText = false,
-  String Function(String?)? validator,
+  String? Function(String?)? validator,
   required Icon prefixIcon,
   IconButton? suffixIcon,
 }) {
@@ -15,6 +15,7 @@ Widget customText({
     child: TextFormField(
       obscureText: obsecureText,
       controller: controller,
+      validator: validator,
       decoration: InputDecoration(
         suffixIcon: textLabel == 'Password' ? suffixIcon : null,
         prefixIcon: prefixIcon,
